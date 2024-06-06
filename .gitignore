@@ -1,1 +1,4 @@
 saved_data/
+.vscode
+.DS_Store
+*.pyc

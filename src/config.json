@@ -1,0 +1,4 @@
+{
+    "use_local_emb_model":false,
+    "cuml":false
+}

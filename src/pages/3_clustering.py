@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans, MiniBatchKMeans
 import streamlit as st
+import faiss
 
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
@@ -23,23 +24,38 @@ rate_limiter = RateLimiter(50, 5)
 
 
 def clustering_pipeline(df, n_clusters, batch_size, n_init):
-    k_means = MiniBatchKMeans(
-        init="k-means++",
-        n_clusters=n_clusters,
-        batch_size=batch_size,
-        n_init=n_init,
-        max_no_improvement=10,
-        verbose=0,
-    )
+
     st.text('Step 1 - START training')
 
     embeddings = np.array(df['embeddings'].values.tolist())
-    k_means.fit(embeddings)
-    st.text('Step 2 - predicting')
 
-    df['cluster'] = k_means.predict(embeddings)
+    ## sklearn
+    # k_means = MiniBatchKMeans(
+    #     init="k-means++",
+    #     n_clusters=n_clusters,
+    #     batch_size=batch_size,
+    #     n_init=n_init,
+    #     max_no_improvement=10,
+    #     verbose=0,
+    # )
+    # k_means.fit(embeddings)
+    # st.text('Step 2 - predicting')
+    # df['cluster'] = k_means.predict(embeddings)
+    # centroids = k_means.cluster_centers_
+
+    ## faiss
+    ncentroids = 10
+    niter = 50
+    verbose = True
+    embeddings = np.array(df['embeddings'].values.tolist())
+    kmeans = faiss.Kmeans(embeddings.shape[1], n_clusters, niter=n_init, verbose=False, nredo=1, seed=42)
+    kmeans.train(embeddings)
+    D, I = kmeans.index.search(embeddings, 1)
+    df['cluster'] = I.reshape(-1)
+    centroids = kmeans.centroids
+
+
     topics_df = pd.DataFrame(columns=['cluster', 'cluster_name', 'centroids'])
-    centroids = k_means.cluster_centers_
     topics_df['cluster'] = list(range(len(centroids)))
     topics_df['centroids'] = centroids.tolist()
 
@@ -81,7 +97,6 @@ def clustering_pipeline(df, n_clusters, batch_size, n_init):
         
     asyncio.run(process_all_topics(sampled_documents_df, trigrams, topics_df, rate_limiter))
     cluster_counts = df['cluster'].value_counts().to_dict()
-    # topics_df['cluster_name'] = topics_df.index
     topics_df['cluster_pct'] = (topics_df['cluster'].replace(cluster_counts)  / df.shape[0]).round(2)
     topics_df['cluster_title'] = topics_df['cluster'].astype(str) + ":" + topics_df['cluster_name'].astype(str) + ":" + topics_df['cluster_pct'].astype(str)
     # </LLM NAMING>

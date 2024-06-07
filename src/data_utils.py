@@ -16,7 +16,7 @@ def extract_tfidf_ngrams(series, n=1):
     tfidf_scores = tfidf_matrix.sum(axis=0).A1
     return Counter(dict(zip(feature_names, tfidf_scores)))
 
-def representative_tfidf_ngrams(df, n=1, total_ngrams=20):
+def representative_tfidf_ngrams(df, n=1, total_ngrams=10):
     """
     Извлечение репрезентативных n-грамм для каждого кластера с учетом TF-IDF
     """

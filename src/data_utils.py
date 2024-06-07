@@ -2,36 +2,10 @@ from collections import Counter
 import time
 import pandas as pd
 import numpy as np
-import h5py
 from sklearn.feature_extraction.text import TfidfVectorizer
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 from llm_utils import get_embedding_local, get_embedding_runpod
-
-# def load_h5_to_dataframe(file_path):
-#     df = pd.read_hdf(file_path, key='df')
-#     with h5py.File(file_path, 'r') as h5file:
-#         embeddings = h5file['embeddings'][:]
-#     df['embeddings'] = list(embeddings)
-#     return df
-
-def load_h5_to_dataframe(file_path):
-    with h5py.File(file_path, 'r') as h5file:
-        questions = [q.decode('utf-8') for q in h5file['questions'][:]]
-        answers = [a.decode('utf-8') for a in h5file['answers'][:]]
-        dates = [d.decode('utf-8') for d in h5file['dates'][:]]
-        embeddings = h5file['embeddings'][:]
-    
-    # Create a DataFrame
-    df = pd.DataFrame({
-        'questions': questions,
-        'answers': answers,
-        'dates': dates,
-        'embeddings': list(embeddings)
-    })
-    
-    return df
-
 
 
 # Функция для извлечения n-грамм, взвешенных по TF-IDF
@@ -84,7 +58,11 @@ def load_to_df(selected_files):
     
     for i, file_path in enumerate(selected_files):
         try:
-            df = load_h5_to_dataframe(file_path)
+            if file_path.endswith('.csv'):
+                df = pd.read_csv(file_path)
+            if file_path.endswith('.feather'):
+                df = pd.read_feather(file_path)
+
             dataframes.append(df)
         except Exception as e:
             st.error(f"Error loading {file}: {e}")
@@ -94,6 +72,7 @@ def load_to_df(selected_files):
     
     if dataframes:
         big_dataframe = pd.concat(dataframes, ignore_index=True)
+        big_dataframe = big_dataframe[['questions', 'answers', 'dates', 'embeddings']]
         return big_dataframe
     else:
         st.write('No valid data to display.')

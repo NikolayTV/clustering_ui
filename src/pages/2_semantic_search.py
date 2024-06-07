@@ -4,7 +4,7 @@ import pandas as pd
 import glob
 import json 
 
-from data_utils import load_h5_to_dataframe, representative_tfidf_ngrams, cosine_similarity_1d, load_to_df, semantic_search
+from data_utils import representative_tfidf_ngrams, cosine_similarity_1d, load_to_df, semantic_search
 from llm_utils import get_embedding_local, get_embedding_runpod
 
 with open('src/config.json', 'r') as f:
@@ -21,19 +21,6 @@ st.title("Тематическое моделирование чатов")
 #     st.error("Пожалуйста, введите числовое значение для максимального количества строк")
 #     ROWS_LIMIT = 100
 ROWS_LIMIT = 100
-
-@st.cache_data
-def load_data(uploaded_file):
-    data_load_state = st.text('Loading data...')
-
-    data = pd.read_csv(uploaded_file)
-    if 'question' not in data.columns.tolist():
-        st.error('data should contain column: sender')
-    elif 'answer' not in data.columns.tolist():
-        st.error('data should contain column: body')
-    data_load_state.text('Loading data...done!')
-    data = data.dropna(subset=['sender', 'body'])
-    return data
 
 @st.cache_data
 def apply_fts(filtered_data, white_list, black_list):
@@ -129,7 +116,7 @@ if 'df' in st.session_state and st.session_state['df'] is not None:
 
     # SAVE
     st.sidebar.header("3. Сохранение")
-    save_path = st.sidebar.text_input("Путь и название файла для сохранения", value="saved_data/test/sample.csv")
+    save_path = st.sidebar.text_input("Путь и название файла для сохранения", value="saved_data/exp1/filename.feather")
 
     if st.sidebar.button("Сохранить"):
         if st.session_state['filtered_data'] is None:
@@ -147,7 +134,11 @@ if 'df' in st.session_state and st.session_state['df'] is not None:
                     os.makedirs(directory)
 
                 filepath = os.path.join(directory, filename)
-                filtered_data.to_csv(filepath, index=False)
+                if filename.endswith('.csv'):
+                    filtered_data.to_csv(filepath, index=False)
+                if filename.endswith('.feather'):
+                    filtered_data.to_feather(filepath)
+
                 st.sidebar.success(f"Даннвые с выбранными фильтрами успешно сохранены в {filepath}")
 
 

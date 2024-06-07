@@ -1,6 +1,5 @@
 import os, glob
 
-import h5py
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans, MiniBatchKMeans
@@ -12,7 +11,7 @@ from scipy.cluster import hierarchy as sch
 from sklearn.metrics.pairwise import cosine_similarity
 import asyncio
 
-from data_utils import load_h5_to_dataframe, representative_tfidf_ngrams, cosine_similarity_1d, load_to_df
+from data_utils import representative_tfidf_ngrams, cosine_similarity_1d, load_to_df
 from llm_utils import async_name_with_llm, name_with_llm, RateLimiter
 
 

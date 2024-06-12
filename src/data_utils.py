@@ -87,16 +87,15 @@ def cosine_similarity_1d(array1, array2):
     return cosine_similarity
 
 @st.cache_data
-def semantic_search(df, target_embedding):
+def get_cos_sim(df, target_embedding, low_threshold, high_threshold=1):
     """
     Sorts df based on cos sim
     """
     start_time = time.time()
 
     embeddings = np.array(df['embeddings'].tolist())
-    cos_sim = cosine_similarity(np.array(target_embedding).reshape(1, -1), embeddings).flatten()
-    df['cos_sim'] = cos_sim
-    df = df.sort_values(by='cos_sim', ascending=False)
+    cos_sim = cosine_similarity(np.array(target_embedding).reshape(1, -1), embeddings).flatten().round(3)
+    
     execution_time = time.time() - start_time
-    st.write(f'Semantic search execution time: {round(execution_time,2)} seconds')
-    return df
+    # st.write(f'Semantic search execution time: {round(execution_time,2)} seconds')
+    return cos_sim

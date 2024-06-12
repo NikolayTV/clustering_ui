@@ -173,8 +173,8 @@ def get_embedding_runpod(semantic_query):
 
     response = requests.post(url, headers=headers, json=data)
 
-    print(response.status_code)
-    print(response.json())
+    # print(response.status_code)
+    # print(response.json())
 
     return {"embeddings": response.json()['output']['embeddings']}
 

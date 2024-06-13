@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  clustapp:
+    build:
+      context: .
+    container_name: clustapp
+    networks:
+      - app-network
+    volumes:
+      - ./saved_data:/app/saved_data
+      - ./saved_templates:/app/saved_templates
+    ports:
+      - "8501:8501"
+      
+  embservice:
+    build:
+      context: ./large-gte-eng
+      dockerfile: Dockerfile
+    container_name: embservice
+    networks:
+      - app-network
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - HF_HOME=/root/.cache/huggingface/hub
+    ports: 
+      - "8014:8000"
+
+networks:
+  app-network:
+    driver: bridge

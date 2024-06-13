@@ -1,6 +1,13 @@
  
 # This is UI for interactive chat analysis and clustering with streamlit
+
+
 ## Installation
+# Option 1 - with Docker-compose
+$ docker build -t clust_app .  
+$ docker run -p 3000:3000 my-node-app
+
+
 * Install nltk package for lemmatization:
 $ python -m nltk.downloader punkt stopwords
 

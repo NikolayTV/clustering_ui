@@ -25,4 +25,4 @@ RUN python3.11 -m pip install --upgrade pip && \
 # Add src files (Worker Template)
 ADD . /
 
-CMD python3.11 -u /src/handler.py
+CMD python3.11 -u /src/handler.py --rp_serve_api 

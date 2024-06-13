@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 # Initialize the model with the determined device
-model = SentenceTransformer('Alibaba-NLP/gte-large-en-v1.5', device=device, trust_remote_code=True)
+model = SentenceTransformer('Alibaba-NLP/gte-large-en-v1.5', device='cpu', trust_remote_code=True)
 
 def handler(event):
     sentences = event['input'].get('sentences', [])

@@ -89,9 +89,42 @@ async def async_name_with_llm(documents, keywords, model_creds, max_tokens=4096,
     }
 
 
+import os
+def is_running_in_docker():
+    """
+    Check if the application is running inside a Docker container.
+    This method checks the existence of the .dockerenv file and inspects the /proc/1/cgroup file.
+    """
+    # Check for .dockerenv file
+    if os.path.exists('/.dockerenv'):
+        return True
+
+    # Check for 'docker' or 'kubepods' in /proc/1/cgroup
+    try:
+        with open('/proc/1/cgroup', 'rt') as f:
+            cgroup_content = f.read()
+            if 'docker' in cgroup_content or 'kubepods' in cgroup_content:
+                return True
+    except Exception:
+        pass
+
+    return False
+def get_service_address():
+    """
+    Determine the service address based on the environment.
+    """
+    if is_running_in_docker():
+        return 'http://embservice:8000/runsync'
+    else:
+        return 'http://localhost:8014/runsync'
+
+# Usage
+
 def get_embedding_runpod(semantic_query):
+    url = get_service_address()
+    print('EMB URL', url)
     # url = 'https://api.runpod.ai/v2/jp223n8tzrt271/runsync'
-    url = 'http://localhost:8000/runsync'
+    # url = 'http://localhost:8000/runsync'
 
     headers = {
         'accept': 'application/json',
@@ -101,6 +134,7 @@ def get_embedding_runpod(semantic_query):
     data = {
         "input": {"sentences": semantic_query}
     }
+
 
     response = requests.post(url, headers=headers, json=data)
 

@@ -1,8 +1,8 @@
  
 # This is UI for interactive chat analysis and clustering with streamlit
 ## Installation
-* Install nlp package for lemmatization:
-$ python -m spacy download en_core_web_sm
+* Install nltk package for lemmatization:
+$ python -m nltk.downloader punkt stopwords
 
 ## Run embedding inference server
 $ python -u large-gte-eng/src/handler.py --rp_serve_api 

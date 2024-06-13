@@ -1,5 +1,4 @@
 import streamlit as st
-from llm_utils import load_model
 
 
 st.set_page_config(page_title="Home", page_icon="🏠")

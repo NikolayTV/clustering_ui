@@ -1,12 +1,27 @@
 from collections import Counter
-import time
+import time, os, glob
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
-from llm_utils import get_embedding_local, get_embedding_runpod
+from llm_utils import get_embedding_runpod
 
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Define the preprocessing function using SpaCy
+def lemmatize(text):
+    text = re.sub(r'\W+', ' ', text)
+    tokens = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+    return ' '.join(tokens)
 
 # Функция для извлечения n-грамм, взвешенных по TF-IDF
 def extract_tfidf_ngrams(series, n=1):
@@ -20,12 +35,17 @@ def representative_tfidf_ngrams(df, n=1, total_ngrams=10):
     """
     Извлечение репрезентативных n-грамм для каждого кластера с учетом TF-IDF
     """
-
+    df['question'] = df['question'].str.lower()
     clusters = df['cluster'].unique()
     representative_ngrams = {}
     for cluster in clusters:
-        cluster_texts = df[df['cluster'] == cluster]['questions']
-        other_texts = df[df['cluster'] != cluster]['questions']
+        cluster_texts = df[df['cluster'] == cluster]['question']
+        other_texts = df[df['cluster'] != cluster]['question']
+        
+        # LEMMATIZE
+        cluster_texts = pd.Series([lemmatize(text) for text in cluster_texts])
+        other_texts = pd.Series([lemmatize(text) for text in other_texts])
+        
         
         # Объединение текстов для правильного расчета TF-IDF
         combined_texts = pd.concat([cluster_texts, other_texts])
@@ -65,14 +85,14 @@ def load_to_df(selected_files):
 
             dataframes.append(df)
         except Exception as e:
-            st.error(f"Error loading {file}: {e}")
+            st.error(f"Error loading {file_path}: {e}")
         
         # Update progress bar
         progress_bar.progress((i + 1) / len(selected_files))
     
     if dataframes:
         big_dataframe = pd.concat(dataframes, ignore_index=True)
-        big_dataframe = big_dataframe[['questions', 'answers', 'dates', 'embeddings']]
+        # big_dataframe = big_dataframe[['question', 'answer', 'dateCreate', 'embeddings']]
         return big_dataframe
     else:
         st.write('No valid data to display.')
@@ -99,3 +119,33 @@ def get_cos_sim(df, target_embedding, low_threshold, high_threshold=1):
     execution_time = time.time() - start_time
     # st.write(f'Semantic search execution time: {round(execution_time,2)} seconds')
     return cos_sim
+
+
+# Directory for saving templates
+templates_dir = "saved_templates"
+if not os.path.exists(templates_dir):
+    os.makedirs(templates_dir)
+
+def load_templates(templates_dir):
+    templates = {}
+    files = glob.glob(f'{templates_dir}/**/*')
+    for filename in files:
+        with open(filename, 'r') as file:
+            templates[filename] = file.read()
+
+    return templates
+
+# Function to save a new template
+def save_template(save_path, content):
+    directory = "/".join(save_path.split('/')[:-1])
+    filename = save_path.split('/')[-1]
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    filepath = os.path.join(directory, filename)
+    with open(filepath, 'w') as file:
+        file.write(content)
+    st.success(f"Template '{filepath}' saved successfully!")
+
+
+

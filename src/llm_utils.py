@@ -4,128 +4,28 @@ import os
 import requests
 import time, datetime
 import json
+import asyncio
 from dotenv import load_dotenv
+
+from prompts import clustering_system_message
+
 load_dotenv()
 
-with open('src/config.json', 'r') as f:
-    config = json.load(f)
-
-
-system_message = """
-Background: You possess expertise in analyzing explicit dialogues, especially in identifying subtle nuances within such conversations.
-
-Task Overview: You will receive topic summaries along with representative messages and keywords. Avoid vague or general descriptions. Instead, focus on precision.
-
-Main Objective:
-Craft a concise naming for the topic, using no more than 20 words. This naming should be highly specific and descriptive. 
-
-Instructions for Labeling:
-Focus on Specificity: Avoid broad terms such as "explicit sexual fantasies" or "detailed sexual conversations." Opt for more explicit descriptors like "dirty sex talk".
-
-Response Format:
-  Please provide output of only NAMING. 
-"""
-
-system_message = """
-Background: You possess expertise in analyzing nitty-gritty of spicy sexting dialogues, especially in identifying subtle nuances within such conversations.
-Task Overview: You will receive examples of messages along with representative  keywords. AVOID VANILLA or general descriptions. Instead, focus on precision and DIAL IN ON THE SPECIFICS.
-Main Objective: Craft a concise naming for the topic, using no more than 20 words. This naming should be highly specific and descriptive. 
-
-Examples output:
-  - Wet Pussy Obsession & Fantasies & Desires
-  - Affirmative Statements (Yes, I will do, etc.)
-  - Romantic Sexting with Heartfelt Affirmations and Sensual References
-  - Request for explicit photos, including pussy close-ups, schoolgirl outfits, and feet images
-  - Oral Sucking & Cock-Centric Desires
-  - Group sex scenarios with nurse & sister & mommy
-  - Math, Science, history chitchat
-  - Anal Domination & Obsession
-  - Rough and Wild Blowjob Fantasies
-  - Cock-sucking Deepthroat Fantasies with Cum-swallowing and Brother's Participation
-  - Pregnancy Fetish & Obsession with Swollen Bellies, Enormous Months, and Huge Pregnant Bodies
-  
-Labeling Tips:
-  Zero in on the Details: Dodge general terms like  `explicit sexual fantasies` or `detailed sexual conversations` Instead, get down and talk dirty with specifics
-Response Format:
-  Please provide output of ONLY THE LABEL of topic. 
-  
-Confirm understanding of your instructions by responding with "acknowledged."
-"""
-
-
-prompt = """
-Given the topic comprising these documents:
-[$DOCUMENTS]
-
-And characterized by these keywords:
-[$KEYWORDS]
-"""
-
-def name_with_llm(documents, keywords):
-    # gets API Key from environment variable OPENAI_API_KEY
-    client = OpenAI(
-      base_url="https://openrouter.ai/api/v1",
-      api_key=os.getenv('OPENROUTER_API_KEY'),
-    )
-
-    prompted = prompt.replace('$DOCUMENTS', str(documents)).replace('$KEYWORDS', str(keywords))
-
-    messages = [{'role': 'user', 'content': system_message},
-                {'role': 'assistant', 'content': 'aknowledged. I will try to opt for specific descriptors. Please provide documents and keywords'},
-                {'role': 'user', 'content': prompted},
-                ]
-
-    start_time = time.time()
-    response = client.chat.completions.create(
-      # model="cognitivecomputations/dolphin-mixtral-8x7b",
-      model="lizpreciatior/lzlv-70b-fp16-hf",
-      # model="sophosympatheia/midnight-rose-70b",
-      max_tokens=100,
-      messages=messages,
-      temperature=0.1
-      )
-
-    execution_time = time.time() - start_time
-
-    text_response = completion.choices[0].message.content.strip()
-    input_tokens = completion.usage.prompt_tokens
-    output_tokens = completion.usage.completion_tokens
-
-    return {
-        "text_response": text_response, 
-        "input_tokens": input_tokens, 
-        "output_tokens": output_tokens,
-        "execution_time": execution_time,
-    }
-
-    return completion.choices[0].message.content
-
-
-async def async_name_with_llm(documents, keywords, rate_limiter=None):
+async def async_call_llm(messages, model_creds, max_tokens=4096, temperature=0.1, rate_limiter=None):
     if rate_limiter is not None:
         await rate_limiter.wait()
-
+    
     client = AsyncOpenAI(
-      base_url="https://openrouter.ai/api/v1",
-      api_key=os.getenv("OPENROUTER_API_KEY"),
+      base_url = model_creds.get('base_url'),
+      api_key = model_creds.get('api_key')
     )
-
-    prompted = prompt.replace('$DOCUMENTS', str(documents)).replace('$KEYWORDS', str(keywords))
-
-    messages = [{'role': 'user', 'content': system_message},
-                {'role': 'assistant', 'content': 'aknowledged. I will try to opt for specific descriptors. Please provide documents and keywords'},
-                {'role': 'user', 'content': prompted},
-                ]
-
 
     start_time = time.time()
     response = await client.chat.completions.create(
-      # model="cognitivecomputations/dolphin-mixtral-8x7b",
-      model="lizpreciatior/lzlv-70b-fp16-hf",
-      # model="sophosympatheia/midnight-rose-70b",
-      max_tokens=100,
+      model=model_creds.get('model'),
       messages=messages,
-      temperature=0.1
+      max_tokens=max_tokens,
+      temperature=temperature
       )
 
     execution_time = time.time() - start_time
@@ -142,20 +42,51 @@ async def async_name_with_llm(documents, keywords, rate_limiter=None):
     }
 
 
-# @st.cache_resource
-def load_model(name='Alibaba-NLP/gte-large-en-v1.5'):
-    st.text("loading model ...")
-    from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer(name, trust_remote_code=True, device='cpu')
-    embedding_model.max_seq_length=256
-    st.write(f"Model loaded on {model.device}")
-    return embedding_model
+async def async_name_with_llm(documents, keywords, model_creds, max_tokens=4096, temperature=0.1, system_message=clustering_system_message, rate_limiter=None):
+    if rate_limiter is not None:
+        await rate_limiter.wait()
+
+    client = AsyncOpenAI(
+      base_url = model_creds.get('base_url'),
+      api_key = model_creds.get('api_key')
+    )
+
+    prompt = """
+    Given the topic comprising these documents:
+    [$DOCUMENTS]
+
+    And characterized by these keywords:
+    [$KEYWORDS]
+    """
+    prompted = prompt.replace('$DOCUMENTS', str(documents)).replace('$KEYWORDS', str(keywords))
+    print(prompted)
+
+    messages = [{'role': 'user', 'content': system_message},
+                {'role': 'assistant', 'content': 'aknowledged. I will try to opt for specific descriptors. Please provide documents and keywords'},
+                {'role': 'user', 'content': prompted},
+                ]
 
 
-def get_embedding_local(semantic_query):
-    model = load_model()
-    embeddings = model.encode(sentences, normalize_embeddings=True)
-    return {"embeddings": embeddings.tolist()}
+    start_time = time.time()
+    response = await client.chat.completions.create(
+      model=model_creds.get('model'),
+      messages=messages,
+      max_tokens=max_tokens,
+      temperature=temperature
+      )
+
+    execution_time = time.time() - start_time
+    
+    text_response = response.choices[0].message.content.strip()
+    input_tokens = response.usage.prompt_tokens
+    output_tokens = response.usage.completion_tokens
+
+    return {
+        "text_response": text_response, 
+        "input_tokens": input_tokens, 
+        "output_tokens": output_tokens,
+        "execution_time": execution_time,
+    }
 
 
 def get_embedding_runpod(semantic_query):

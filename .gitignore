@@ -3,3 +3,4 @@ saved_data/
 .DS_Store
 *.pyc
 data/
+.env

@@ -12,7 +12,7 @@ import pandas as pd
 from data_utils import load_templates, save_template, load_to_df, get_cos_sim
 from llm_utils import get_embedding_runpod, async_call_llm, RateLimiter
 from config import AVAILABLE_MODELS
-from streamlit_utils import show_df, drop_duplicates_checkbox, templates_form
+from streamlit_utils import show_df, templates_form, remove_duplicates
 
 # File Upload Section
 st.set_page_config(
@@ -141,8 +141,8 @@ if st.session_state['df'] is not None:
         st.header("2. Filter data")
         
         st.markdown("Removes duplicated rows, and creates new column 'count'")
-        drop_duplicates_checkbox(filtered_data)
-        
+        st.session_state.remove_duplicates_checkbox = st.checkbox(label='Remove duplicates', value=True)
+
         # FTS        
         st.subheader("Strict match filtering")
         st.markdown("Use this separator between words ; (for example - sky;blue)")
@@ -169,6 +169,9 @@ if st.session_state['df'] is not None:
             st.session_state.apply_filters = True
             
     if st.session_state.apply_filters:
+        if st.session_state.remove_duplicates_checkbox:
+            filtered_data = remove_duplicates(filtered_data)
+
         if len(st.session_state['semantic_queries']) > 0:
             semantic_queries = [(query, semantic_threshold) for query, semantic_threshold in st.session_state.semantic_queries if len(query) > 0]
             

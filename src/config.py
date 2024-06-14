@@ -1,4 +1,6 @@
 import os
+import dotenv
+dotenv.load_dotenv()
 
 AVAILABLE_MODELS = [
     {
@@ -23,3 +25,9 @@ AVAILABLE_MODELS = [
     },
         
 ]
+
+USE_LOCAL_EMBED_MODEL = False
+EMBED_MODEL = {
+    "url": "https://api.runpod.ai/v2/jp223n8tzrt271/runsync",
+    "api_key": os.getenv('RUNPOD_API_KEY'),
+}

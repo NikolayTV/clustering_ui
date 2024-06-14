@@ -11,14 +11,12 @@ def show_df(df, default_columns=['question'], default_max_rows=10000):
     styled_df = df[:ROWS_LIMIT][SELECTED_COLUMNS].reset_index(drop=True)
     st.dataframe(styled_df, width=1000)
     
-def drop_duplicates_checkbox(df):
-    checkbox = st.checkbox(label='Remove duplicates', value=True)
-    if checkbox:
-        try:
-            df['count'] = df.groupby('question')['question'].transform('count')
-            df = df.drop_duplicates(subset='question')
-        except Exception as e:
-            print(f"Error: {e}")
+@st.cache_data
+def remove_duplicates(df):
+    df['count'] = df.groupby('question')['question'].transform('count')
+    df = df.drop_duplicates(subset='question')
+    return df
+
             
 def templates_form(default_template=None):
     if 'show_save_form' not in st.session_state:

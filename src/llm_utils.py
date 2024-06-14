@@ -8,6 +8,7 @@ import asyncio
 from dotenv import load_dotenv
 
 from prompts import clustering_system_message
+import config
 
 load_dotenv()
 
@@ -121,30 +122,34 @@ def get_service_address():
         # return "http://localhost:8000/rynsync" # runpod handler
 
 # Usage
-
 def get_embedding_runpod(semantic_query):
-    url = get_service_address()
+    if config.USE_LOCAL_EMBED_MODEL:
+        url = get_service_address()
+    else:
+        url = config.EMBED_MODEL['url']
+        api_key = config.EMBED_MODEL['api_key']
+        print('USING REMOTE EMBED MODEL')
+        
     print('EMB URL', url)
-    # url = 'https://api.runpod.ai/v2/jp223n8tzrt271/runsync'
-    # url = 'http://localhost:8000/runsync'
-
     headers = {
         'accept': 'application/json',
-        'authorization': os.getenv('RUNPOD_API_KEY_SHARED'),
+        'authorization': api_key,
         'Content-Type': 'application/json'
     }
 
     data = {'input': {
-            "sentences": [
-                semantic_query
-            ]
-        }}
-
-
-    response = requests.post(url, headers=headers, json=data)
-
-    # print(response.status_code)
-    emb = response.json()['output']['embeddings'][0]
+                    "sentences": [
+                        semantic_query
+                    ]
+                }
+            }
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        emb = response.json()['output']['embeddings'][0]
+    except Exception as e:
+        print(f'Error trying to call local embed model {e}')    
+        
+        
     return {"embeddings": emb}
 
 

@@ -9,3 +9,5 @@ runpod
 sentence-transformers
 requests
 hf-transfer
+uvicorn
+fastapi

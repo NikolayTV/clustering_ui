@@ -23,9 +23,9 @@ services:
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
     environment:
-      - HF_HOME=/root/.cache/huggingface/hub
+      - HF_HOME=/root/.cache/huggingface/
     ports: 
-      - "8014:8000"
+      - "8000:8000"
 
 networks:
   app-network:

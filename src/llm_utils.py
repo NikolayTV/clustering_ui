@@ -113,10 +113,12 @@ def get_service_address():
     """
     Determine the service address based on the environment.
     """
+    
     if is_running_in_docker():
-        return 'http://embservice:8000/runsync'
+        return 'http://embservice:8000/embed'
     else:
-        return 'http://localhost:8014/runsync'
+        return 'http://localhost:8000/embed'
+        # return "http://localhost:8000/rynsync" # runpod handler
 
 # Usage
 
@@ -131,17 +133,19 @@ def get_embedding_runpod(semantic_query):
         'authorization': os.getenv('RUNPOD_API_KEY_SHARED'),
         'Content-Type': 'application/json'
     }
-    data = {
-        "input": {"sentences": semantic_query}
-    }
+
+    data = {'input': {
+            "sentences": [
+                semantic_query
+            ]
+        }}
 
 
     response = requests.post(url, headers=headers, json=data)
 
     # print(response.status_code)
-    # print(response.json())
-
-    return {"embeddings": response.json()['output']['embeddings']}
+    emb = response.json()['output']['embeddings'][0]
+    return {"embeddings": emb}
 
 
 

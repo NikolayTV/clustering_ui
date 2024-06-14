@@ -42,4 +42,7 @@ COPY . .
 
 # Command to run the application
 EXPOSE 8501
-CMD ["streamlit", "run", "src/1_home.py"]
+CMD ["streamlit", "run", "src/1_home.py", "--server.port", "8501"]
+
+
+

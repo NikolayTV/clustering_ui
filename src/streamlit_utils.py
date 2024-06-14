@@ -25,13 +25,15 @@ def templates_form(default_template=None):
     with st.form("templates_form"):
         templates = load_templates(templates_dir='saved_templates')
 
-        selected_template = st.selectbox("Select a prompt template", list(templates.keys()), key=default_template)
+        selected_template = st.selectbox("Select a prompt template", list(templates.keys()), index=list(templates.keys()).index(default_template))
+        # selected_template = st.selectbox("Select a prompt template", list(templates.keys()), key=default_template)
         prompt_text = st.text_area("Prompt", templates[selected_template].strip(), height=300)
         if st.form_submit_button("Save template"):
             st.session_state.show_save_form = True  
             st.session_state.prompt_text = prompt_text 
             st.session_state.selected_template = selected_template
-
+            # st.experimental_rerun()
+            
     if st.session_state.show_save_form:
         with st.form("save_form"):
             new_template_name = st.text_input("Enter new path (it should end with .txt)", value=st.session_state.selected_template)

@@ -125,6 +125,7 @@ def get_service_address():
 def get_embedding_runpod(semantic_query):
     if config.USE_LOCAL_EMBED_MODEL:
         url = get_service_address()
+        api_key = None
     else:
         url = config.EMBED_MODEL['url']
         api_key = config.EMBED_MODEL['api_key']

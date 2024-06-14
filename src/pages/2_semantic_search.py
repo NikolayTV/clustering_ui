@@ -244,7 +244,7 @@ if st.session_state['df'] is not None:
         temperature = st.sidebar.number_input("temperature", min_value=0.0, max_value=1.0, value=0.1)
 
     # LOAD AND SAVE TEMPLATE
-    selected_template, prompt_text = templates_form()
+    selected_template, prompt_text = templates_form(default_template='saved_templates/chatting/base.txt')
 
     # Button to trigger the LLM call
     num_messages_per_call = st.number_input("question per call", min_value=1, value=50)

@@ -26,8 +26,10 @@ AVAILABLE_MODELS = [
         
 ]
 
-USE_LOCAL_EMBED_MODEL = False
+USE_LOCAL_EMBED_MODEL = True
 EMBED_MODEL = {
     "url": "https://api.runpod.ai/v2/jp223n8tzrt271/runsync",
     "api_key": os.getenv('RUNPOD_API_KEY'),
 }
+
+

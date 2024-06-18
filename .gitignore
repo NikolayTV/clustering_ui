@@ -4,3 +4,5 @@ saved_data/
 *.pyc
 data/
 .env
+saved_data/
+saved_templates/

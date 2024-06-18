@@ -10,6 +10,7 @@ services:
     volumes:
       - ./saved_data:/app/saved_data
       - ./saved_templates:/app/saved_templates
+      - ./saved_labeled_data:/app/saved_labeled_data
     ports:
       - "8501:8501"
       

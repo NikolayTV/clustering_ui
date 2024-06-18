@@ -1,4 +1,10 @@
 import streamlit as st
+import collections
+if not hasattr(collections, 'MutableMapping'):
+    import collections.abc
+    collections.MutableMapping = collections.abc.MutableMapping
+    collections.MutableSet = collections.abc.MutableSet
+
 from openai import OpenAI, AsyncOpenAI
 import os
 import requests

@@ -23,7 +23,14 @@ AVAILABLE_MODELS = [
         "model": "perplexity/llama-3-sonar-large-32k-chat",
         "max_input": 32000
     },
-        
+
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "cognitivecomputations/dolphin-mixtral-8x22b",
+        "max_input": 32000
+    },
+
 ]
 
 USE_LOCAL_EMBED_MODEL = False

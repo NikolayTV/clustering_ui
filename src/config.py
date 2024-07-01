@@ -30,7 +30,34 @@ AVAILABLE_MODELS = [
         "model": "cognitivecomputations/dolphin-mixtral-8x22b",
         "max_input": 32000
     },
+    
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "01-ai/yi-large",
+        "max_input": 32000
+    },
+        
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "google/gemma-2-9b-it:free",
+        "max_input": 8192
+    },
 
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "sao10k/l3-euryale-70b",
+        "max_input": 16000
+    },
+    
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "nvidia/nemotron-4-340b-instruct",
+        "max_input": 4096
+    },
 ]
 
 USE_LOCAL_EMBED_MODEL = False

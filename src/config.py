@@ -58,6 +58,35 @@ AVAILABLE_MODELS = [
         "model": "nvidia/nemotron-4-340b-instruct",
         "max_input": 4096
     },
+    
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "cohere/command-r-plus",
+        "max_input": 4096
+    },    
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "meta-llama/llama-3.1-8b-instruct",
+        "max_input": 4096
+    },   
+    
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "meta-llama/llama-3.1-70b-instruct",
+        "max_input": 4096
+    },   
+    {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "model": "meta-llama/llama-3-405b-instruct",
+        "max_input": 4096
+    },        
+
+    
+    
 ]
 
 USE_LOCAL_EMBED_MODEL = False
